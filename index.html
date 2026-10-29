@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light">
+<title>Down for Maintenance</title>
+<script src="https://cdn.tailwindcss.com/3.4.17"></script>
+<script>tailwind.config = { darkMode: 'class' };</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.3.1/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.3.1/umd/react-dom.production.min.js"></script>
+<style>
+  :root { box-sizing: border-box; padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); }
+  html { scroll-padding-top: env(safe-area-inset-top, 0px); }
+  html, body { min-height: 100%; background: #fff; color: #000; font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  body { overflow-x: hidden; }
+
+  .fade-up { opacity: 0; animation: fadeUp .8s ease forwards; }
+  .d1 { animation-delay: .1s; } .d2 { animation-delay: .3s; } .d3 { animation-delay: .5s; }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+
+  /* plugs slide together, hold, then pull apart */
+  .plug { animation: plug 3.6s ease-in-out infinite; }
+  @keyframes plug {
+    0%   { transform: translateX(-10px); }
+    42%  { transform: translateX(16px); }
+    62%  { transform: translateX(16px); }
+    100% { transform: translateX(-10px); }
+  }
+  /* sparks flash while connected */
+  .spark { opacity: 0; transform-origin: 400px 80px; animation: spark 3.6s ease-in-out infinite; }
+  @keyframes spark {
+    0%, 38%  { opacity: 0; transform: scale(.4); }
+    44%      { opacity: 1; transform: scale(1.2); }
+    52%      { opacity: .2; transform: scale(.9); }
+    58%      { opacity: 1; transform: scale(1.3); }
+    70%, 100% { opacity: 0; transform: scale(.4); }
+  }
+  /* energy flowing along cables */
+  .flow { stroke-dasharray: 6 24; animation: flow 1.2s linear infinite; }
+  @keyframes flow { to { stroke-dashoffset: -60; } }
+  /* gear-free soft pulse for the logo */
+  .pulse { animation: pulse 2.4s ease-in-out infinite; transform-origin: center; transform-box: fill-box; }
+  @keyframes pulse { 50% { transform: scale(1.12); } }
+
+  @media (prefers-reduced-motion: reduce) {
+    .fade-up { opacity: 1; animation: none; }
+    .plug, .spark, .flow, .pulse { animation: none; }
+    .plug { transform: translateX(3px); }
+  }
+</style>
+</head>
+<body class="bg-white text-black">
+<div id="root"></div>
+<script>
+const h = React.createElement;
+const r = (x, y, w, hh, fill, rx) => h('rect', { x, y, width: w, height: hh, fill, rx: rx || 0 });
+
+const BLUE = { cable: '#a8dcf8', collar: '#0d5cb5', dark: '#0b5fb5', mid: '#00a6f4', light: '#a6e0fb', plate: '#b3e5fc', p1: '#00a6f4', p2: '#0b5fb5' };
+const GREEN = { cable: '#2dff55', collar: '#0b6e12', dark: '#0f7a1f', mid: '#00c853', light: '#3dff6a', plate: '#00d84a', hole: '#0b6e12' };
+
+const CABLE = 'M-3000 36 H150 a14 14 0 0 1 14 14 V58 a22 22 0 0 0 22 22 H330';
+
+function Side({ c, socket, mirror }) {
+  const plug = h('g', { className: 'plug' },
+    r(280, 70, 26, 20, c.collar, 3),
+    r(302, 58, 25, 22, c.dark), r(327, 58, 25, 22, c.mid),
+    r(302, 80, 25, 22, c.mid), r(327, 80, 25, 22, c.light),
+    socket
+      ? [r(352, 52, 28, 56, c.plate, 2), r(358, 64, 14, 7, c.hole, 2), r(358, 89, 14, 7, c.hole, 2)]
+      : [r(352, 52, 12, 56, c.plate, 2), r(364, 64, 24, 7, c.p1, 3), r(364, 89, 24, 7, c.p2, 3)]
+  );
+  return h('g', { transform: mirror ? 'translate(800,0) scale(-1,1)' : undefined },
+    h('path', { d: CABLE, fill: 'none', stroke: c.cable, strokeWidth: 14, strokeLinecap: 'round', strokeLinejoin: 'round' }),
+    h('path', { className: 'flow', d: CABLE, fill: 'none', stroke: '#fff', strokeOpacity: .75, strokeWidth: 4, strokeLinecap: 'round' }),
+    plug
+  );
+}
+
+function Sparks() {
+  const rays = [0, 45, 90, 135, 180, 225, 270, 315].map((a) =>
+    h('line', { key: a, x1: 400 + 9 * Math.cos(a * Math.PI / 180), y1: 80 + 9 * Math.sin(a * Math.PI / 180), x2: 400 + 22 * Math.cos(a * Math.PI / 180), y2: 80 + 22 * Math.sin(a * Math.PI / 180), stroke: a % 90 ? '#00c853' : '#00a6f4', strokeWidth: 3.5, strokeLinecap: 'round' }));
+  return h('g', { className: 'spark' }, rays, h('circle', { cx: 400, cy: 80, r: 5, fill: '#fff', stroke: '#00c853', strokeWidth: 2 }));
+}
+
+function Illustration() {
+  return h('div', { className: 'flex w-full justify-center overflow-hidden', 'aria-hidden': true },
+    h('svg', { viewBox: '0 0 800 150', className: 'h-auto w-[640px] max-w-none flex-none overflow-visible sm:w-[800px]' },
+      h(Side, { c: BLUE, socket: false, mirror: false }),
+      h(Side, { c: GREEN, socket: true, mirror: true }),
+      h(Sparks)
+    )
+  );
+}
+
+function App() {
+  return h('div', { className: 'flex min-h-screen flex-col bg-white text-black' },
+    h('main', { className: 'flex flex-1 flex-col items-center justify-center gap-10 py-10' },
+      h('div', { className: 'px-6 text-center' },
+        h('h1', { className: 'fade-up d1 mx-auto max-w-xl text-balance text-3xl font-extrabold leading-tight tracking-tight sm:text-5xl' }, 'The site is currently down for maintenance'),
+        h('p', { className: 'fade-up d2 mx-auto mt-5 max-w-sm text-sm sm:text-base' }, 'We apologize for any inconvenience caused. We’ve almost finished.')
+      ),
+      h('div', { className: 'fade-up d3 w-full' }, h(Illustration))
+    )
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(h(App));
+</script>
+</body>
+</html>

@@ -1,0 +1,23 @@
+# --- Maintenance mode (Apache / cPanel) ---
+# Upload this file and maintenance.html to public_html.
+# To turn maintenance OFF: delete this file (or comment out the lines below).
+
+ErrorDocument 503 /maintenance.html
+
+<IfModule mod_headers.c>
+  Header always set Retry-After "3600"
+  Header always set Cache-Control "no-store"
+</IfModule>
+
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+
+  # Optional: let yourself view the real site. Remove the leading # and put your IP:
+  # RewriteCond %{REMOTE_ADDR} !^123\.123\.123\.123$
+
+  # Don't block the maintenance page itself
+  RewriteCond %{REQUEST_URI} !^/maintenance\.html$
+
+  # Everyone else gets a 503 (tells Google this is temporary) + the page above
+  RewriteRule ^ - [R=503,L]
+</IfModule>
